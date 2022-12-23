@@ -1,19 +1,19 @@
 # TCP/IP project
 
-This is the work I have done for a university course called "TCP/IP-Programming". We were given two weeks for each of the exercises, which are implemented in C.
+This is the work I have done for a university course called "TCP/IP-Programming". We were given two weeks for each of the assignments, which are implemented in C.
 
 
-## Exercise 1 - Simple remote system monitor
+## Assignment 1 - Simple remote system monitor
 
 Simple implementation of a remote system monitor client and server application utilizing TCP and run as a non interactive, single command. Some parameters execute specific commands, otherwise the same command is sent to the remote machine and its outputs forwarded to the client.
 
 
-## Exercise 2 - Very lightweight file transfer protocol
+## Assignment 2 - Very lightweight file transfer protocol
 
-Implementation of a basic TCP file transfer protocol. The client can send files to and receive files from the server.
+Implementation of a basic TCP file transfer protocol. The client can send files to and receive files from the server. Additionally, srsmon functionality is still provided as in assignment 1.
 
 
-## Exercise 3 - Simple message broker
+## Assignment 3 - Simple message broker
 
 This is the final and rated program of the course. We were to implement a basic message broker system based on UDP, consisting of programs for:
 
