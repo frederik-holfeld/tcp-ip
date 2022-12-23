@@ -1,9 +1,0 @@
-Der von mir programmierte System-Monitor sollte folgende Sicherheitsprobleme haben:
-
-Das System fragt nicht nach einem Passwort, es kann also jeder, der über die IP-Addresse des Systems verfügt, Befehle an den Daemon senden. Diese Befehle sollten dann über die Rechte des Nutzers verfügen, der den Daemon gestartet hat. Sollte im schlimmsten Fall root den Daemon gestartet haben, hätte der Angreifer komplette Kontrolle über das System, solange der Befehl mit einer Zeile ausgeführt werden kann und keine weiteren Eingaben benötigt.
-
-Es wird ebenfalls keine Verschlüsselung vom Programm selbst vorgenommen, der Datenaustausch ist also nur von den bereits vorhandenen Sicherheitsmechanismen der Netzwerkschnittstelle vor der Außenwelt geschützt.
-
-Anderweitig sollte das System nicht sonderlich anfällig für Benutzerfehler sein. Falls der Client-Befehl falsch ausgeführt wird, erhält der Nutzer eine Fehlermeldung, die auf die richtige Nutzung hinweist. Ebenfalls wird im Client und im Server geprüft, dass die gesendeten Strings korrekt mit \0 beendet werden. So wird verhindert, dass Reste vorheriger Befehle oder Ausgabe-Puffer fälschlicherweise ausgeführt werden. Noch sicherer wäre es jedoch hier, die Puffer nach Benutzung wieder komplett zu überschreiben.
-
-Ein Problem, das sich noch bemerkbar machen könnte, ist, dass der Eingabebefehl zur Zeit auf 1024 bzw. 1023 Zeichen begrenzt ist. Es sollte ein absoluter Randfall sein, dass ein Nutzer Befehle mit noch mehr Zeichen ausführen will, es ist jedoch nicht auszuschließen. Momentan wird der Nutzer nicht gewarnt, dass womöglich das Ende eines Befehls abgeschnitten werden könnte und dementsprechend der Befehl nicht wie gewollt ausgeführt wird.
