@@ -1,0 +1,13 @@
+Aufgabe 2 hat ähnliche / die gleichen Sicherheitsprobleme wie der System-Monitor:
+
+Das System fragt nicht nach einem Passwort, es kann also jeder, der über die IP-Addresse des Servers verfügt, Befehle an den Daemon senden. Diese Befehle sollten dann über die Rechte des Nutzers verfügen, der den Daemon gestartet hat. Sollte im schlimmsten Fall root den Daemon gestartet haben, hätte der Angreifer komplette Kontrolle über das system, solange der Befehl mit einer Zeile ausgeführt werden kann und keine weiteren Eingaben benötigt.
+
+Es wird ebenfalls keine Verschlüsselung vom Programm selbst vorgenommen, der Datenaustausch ist also nur von den bereits vorhandenen Sicherheitsmechanismen der Netzwerkschnittstelle vor der Außenwelt geschützt.
+
+Anderweitig sollte das System nicht sonderlich anfällig für Benutzerfehler sein. Falls der Client-Befehl falsch ausgeführt wird, erhält der Nutzer eine Fehlermeldung, die auf die richtige Nutzung hinweist. Ebenfalls wird im Client und im Server geprüft, dass die gesendeten Strings korrekt mit \0 beendet werden. So wird verhindert, dass Reste vorheriger Befehle oder Ausgabe-Puffer fälschlicherweise ausgeführt werden. Noch sicherer wäre es jedoch hier, die Puffer nach Benutzung wieder komplett zu überschreiben.
+
+Der Nutzer sollte außerdem erfolgreich daran gehindert werden, bereits existierende Dateien zu überschreiben. er wird gebeten, einen anderen Namen in argv[4] zu spezifizieren. Schöner wäre es hier noch, wenn er interaktiv mit scanf nach einen neuen Namen gefragt werden würde, statt dass das Programm mit der Fehlermeldung terminiert.
+
+Ein Problem, das sich noch bemerkbar machen könnte, ist, dass der Eingabebefehl zur Zeit bei 1024 bzw. 1023 Zeichen begrenzt ist. Es sollte ein absoluter Randfall sein, dass ein Nutzer Befehle mit noch mehr Zeichen ausführen will, es ist jedoch nicht auszuschließen. Momentan wird der Nutzer nicht gewarnt, dass womöglich das Ende eines Befehls abgeschnitten werden könnte und dementsprechend der Befehl nicht wie gewollt ausgeführt wird.
+
+Die versendbaren Dateien sind ebenfalls auf ein Megabyte begrenzt, da ich für die Puffer-Größe einen Makro verwende. Als ich 10 Megabyte oder mehr eingestellt hatte, sind beide Programme sofort mit SIGSEGV terminiert. Um die Dateigrößenbegrenzung zu umgehen, müsste irgendwie ein Workaround für die Makros oder eine andere Deklarationsweise genutzt werden. Kleinere Dateien, wie das PDF mit der Aufgabenstellung, zu kopieren, hat jedoch gut funktioniert.
