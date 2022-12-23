@@ -17,8 +17,8 @@ Implementation of a basic TCP file transfer protocol. The client can send files 
 
 This is the final and rated program of the course. We were to implement a basic message broker system based on UDP, consisting of programs for:
 
-Publisher - Sends messages to a topic, which the broker distributes to subscribers.
-Subscriber - Subscribes to a topic and receives messages from publishers delivered by the broker.
+Publisher - Sends messages to a topic, which the broker distributes to subscribers.  
+Subscriber - Subscribes to a topic and receives messages from publishers delivered by the broker.  
 Broker - Receives publishing and subscription requests and forwards published messages to every subscriber of that topic.
 
 
