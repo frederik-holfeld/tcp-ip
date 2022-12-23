@@ -1,0 +1,73 @@
+Der von mir entwickelte Simple Message Broker nutzt folgendes Protokoll zum Schicken von Anfragen an den Broker:
+
+	Header[21]: 				Enthält Informationen über Nachricht.
+		char Rolle: 			Entweder ‘p’ für Publisher oder ‘s’ für Subscriber. Für Kontrollfluss des Brokers essentiell.
+			Gesamtlänge[10]: 	Integer, der die Gesamtlänge der Nachricht angibt.
+			(Topic-Länge[10]: Integer, der die Länge der Topic angibt, um diese von der Nachricht selbst unterscheiden zu können. Nur von Publisher genutzt.)
+		Nachricht[n]: 			Die eigentliche Nachricht, kann beliebig groß sein.
+
+Ich habe mich für dieses Protokoll entschieden, da ich die Abspeicherung des Nachrichtenverlaufs fest eingeplant hatte und daher möglichst speicher-effizient sein wollte. So wird es ermöglicht, auch große Nachrichten (womöglich sogar Dateien) zu verschicken, da man nicht von einer festen Puffer-Größe limitiert wird. Ebenfalls kann so dynamisch bei einer Anfrage eines Publishers zwischen der Topic und der Nachricht unterschieden werden, was beliebige Topic-Längen erlaubt.
+
+
+Ein weiterer Teil der Programm-Architektur sind die im Broker verwendeten Strukturen:
+
+	struct list {
+		uint count
+		uint max
+		void* *arr
+	}
+
+	struct topic {
+		char *name
+		struct list subs
+		struct list msgs
+	}
+
+	struct wildcard {
+			char *name
+			struct list subs
+	}
+
+list ist die Basis-Struktur, auf der topic und wildcard aufbauen. list enthält counter, der die vorhandenen Elemente in der Liste zählt, max gibt die maximale Anzahl an Elementen an, und array ist das Array selbst mit Pointern auf die gespeicherten Elemente.
+topic baut darauf auf und hat einen Namen name und zwei Listen, die einerseits die Nachrichten und andererseits die Abonnenten der topic speichern.
+wildcard enthält lediglich einen Namen und die Liste der Abonnenten. Nachrichten werden nur in Topics gespeichert.
+
+Mein Ziel mit diesen Strukturen war es, dynamisch die Größe der Speicherstellen zur Laufzeit anpassen zu können, aber gleichzeitig schnellen Zugriff über Indizierung (also effektiv ein Array) zu erreichen. Die Listen müssen wachsen können, da bei Programmstart nicht abzusehen ist, wie viele Topics oder Wildcards es geben wird und wie viele Nachrichten diese halten können müssen.
+Der Zugriff auf Elemente per Index könnte ebenfalls hilfreich sein, falls spätere Funktionalität beispielsweise das Löschen alter Nachrichten ermöglicht. So könnte eine Methode
+
+	delete(struct *list, uint)
+
+etwa schnell die ersten 1000000 Elemente der Liste löschen, ohne durch alle diese Elemente durch-iterieren zu müssen und nach dem Nachfolger (wie bei einer verketteten Liste) zu suchen und durch Cache-Misses Rechenzeit zu verschwenden. Ebenfalls lassen sich For-Schleifen so angenehm handhaben.
+
+
+Erwähnenswert ist wahrscheinlich noch, wie die Wildcards funktionieren:
+Sollte in einem Request eines Subscribers ein '#' entdeckt werden, so wird die Topic als Wildcard interpretiert und anders gehandhabt. Einerseits wird diese Wildcard-Topic nicht in der Topic-Liste gespeichert, sondern in der Wildcard-Liste, um sie unterscheiden zu können. Andererseits wird sie anders ausgewertet: statt jeden char bei der Topic-Suche zu vergleichen, reicht lediglich das Übereinstimmen der Zeichen vor dem '#'. So wird also eine Topic "/test/test2" auch von einem "/test/#"-Wildcard-Abonnenten abonniert. Ebenfalls wird jede Topic von "#" abonniert. Mit diesem System kann im Grunde eine beliebige Hierarchie aufgebaut werden und die Wildcards sollten nach wie vor funktionieren.
+
+
+Da das Programm etwas umfangreicher geworden ist, hier noch eine kleine Baumstruktur des Programmflusses:
+
+	Setup
+	Endlosschleife
+		Empfangen des Headers und Speichern der Gesamt-Nachricht
+		Wenn Publisher:
+			Wildcard-Abonnenten bedienen
+			Wenn Topic noch nicht vorhanden:
+				Topic erstellen, Nachricht speichern und in Topic-Liste hinterlegen
+			Wenn Topic bereits vorhanden:
+				Abonnenten bedienen
+				Nachricht der Topic-Historie anhängen
+		Wenn Subscriber:
+			Wenn Wildcard-Abonnent:
+				Historie aller übereinstimmenden Topics beziehen
+				Wenn Wildcard noch nicht vorhanden:
+					Wildcard erstellen, als Abonnent eintragen und in Wildcard-Liste speichern
+				Wenn Wildcard schon vorhanden:
+					Wenn noch nicht abonniert:
+						Abonnieren
+			Wenn Topic-Abonnent:
+				Wenn Topic noch nicht vorhanden:
+					Topic erstellen, als Abonnent eintragen und in Topic-Liste speichern
+				Wenn Topic schon vorhanden:
+					Historie beziehen
+					Wenn noch nicht abonniert:
+						Abonnieren
